@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import type { Profile } from '../types'
 
-// Cliente admin com service role — usado apenas para criar usuários
+// Cliente admin com service role
 const adminClient = createClient(
   import.meta.env.VITE_SUPABASE_URL as string,
   import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY as string
@@ -21,7 +21,6 @@ export function useMembers() {
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('role', 'member')
       .order('name')
     if (error) setError(error.message)
     else setMembers((data as Profile[]) ?? [])
@@ -46,12 +45,23 @@ export function useMembers() {
   }
 
   const deleteMember = async (id: string) => {
-    // Remove o usuário do Auth (cascade apaga o profile e contatos)
     const { error: authError } = await adminClient.auth.admin.deleteUser(id)
     if (authError) return { error: authError.message }
     setMembers((prev) => prev.filter((m) => m.id !== id))
     return { error: null }
   }
 
-  return { members, loading, error, createMember, deleteMember }
+  const changeRole = async (id: string, role: 'admin' | 'member') => {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role })
+      .eq('id', id)
+    if (error) return { error: error.message }
+    setMembers((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, role } : m))
+    )
+    return { error: null }
+  }
+
+  return { members, loading, error, createMember, deleteMember, changeRole }
 }
