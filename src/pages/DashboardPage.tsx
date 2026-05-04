@@ -19,6 +19,7 @@ const MEDAL = ['🥇', '🥈', '🥉']
 interface RankingItem {
   id: string
   name: string
+  role: string
   total: number
 }
 
@@ -160,7 +161,12 @@ export default function DashboardPage() {
                       <span className="text-sm font-bold text-slate-400">{i + 1}º</span>
                     )}
                   </div>
-                  <div className="w-36 truncate text-sm font-medium text-slate-800">{item.name}</div>
+                  <div className="flex items-center gap-1.5 w-44">
+                    <span className="truncate text-sm font-medium text-slate-800">{item.name}</span>
+                    {item.role === 'admin' && (
+                      <span className="shrink-0 rounded-full bg-primary-100 px-1.5 py-0.5 text-xs font-medium text-primary-700">Admin</span>
+                    )}
+                  </div>
                   <div className="flex-1 rounded-full bg-slate-100 h-2.5 overflow-hidden">
                     <div
                       className="h-2.5 rounded-full bg-gradient-to-r from-primary-500 to-primary-400 transition-all"
