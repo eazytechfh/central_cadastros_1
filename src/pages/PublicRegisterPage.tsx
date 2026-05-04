@@ -1,6 +1,13 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { createClient } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
+
+// Cliente admin para criar usuário já confirmado (sem e-mail de verificação)
+const adminClient = createClient(
+  import.meta.env.VITE_SUPABASE_URL as string,
+  import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY as string
+)
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
@@ -31,32 +38,38 @@ export default function PublicRegisterPage() {
     setStatus('loading')
     setErrorMsg('')
 
-    const { data, error } = await supabase.auth.signUp({
+    // Cria o usuário já confirmado usando service role (sem e-mail de verificação)
+    const { error: createError } = await adminClient.auth.admin.createUser({
       email: email.trim(),
       password: senha,
-      options: {
-        data: { name: nome.trim(), role: 'member' },
-      },
+      email_confirm: true,
+      user_metadata: { name: nome.trim(), role: 'member' },
     })
 
-    if (error) {
+    if (createError) {
       setErrorMsg(
-        error.message === 'User already registered'
+        createError.message.includes('already registered') || createError.message.includes('already been registered')
           ? 'Este e-mail já possui uma conta cadastrada.'
-          : error.message
+          : createError.message
       )
       setStatus('error')
       return
     }
 
-    // Se confirmação de e-mail está desativada, a sessão já existe — loga direto
-    if (data.session) {
-      navigate('/contacts')
+    // Faz login automático após criação
+    const { error: loginError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password: senha,
+    })
+
+    if (loginError) {
+      // Conta criada mas login falhou — manda para o login manual
+      setStatus('success')
       return
     }
 
-    // Caso raro: confirmação ainda ativa
-    setStatus('success')
+    // Logado com sucesso — vai direto para os contatos
+    navigate('/contacts')
   }
 
   if (status === 'success') {
