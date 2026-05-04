@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
 export default function PublicRegisterPage() {
+  const navigate = useNavigate()
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
@@ -29,7 +31,7 @@ export default function PublicRegisterPage() {
     setStatus('loading')
     setErrorMsg('')
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password: senha,
       options: {
@@ -47,6 +49,13 @@ export default function PublicRegisterPage() {
       return
     }
 
+    // Se confirmação de e-mail está desativada, a sessão já existe — loga direto
+    if (data.session) {
+      navigate('/contacts')
+      return
+    }
+
+    // Caso raro: confirmação ainda ativa
     setStatus('success')
   }
 
@@ -60,18 +69,15 @@ export default function PublicRegisterPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-slate-900">Cadastro realizado!</h2>
+            <h2 className="text-xl font-bold text-slate-900">Conta criada!</h2>
             <p className="mt-2 text-sm text-slate-500">
               Bem-vindo(a), <strong>{nome}</strong>!
             </p>
-            <div className="mt-4 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
-              Verifique seu e-mail <strong>{email}</strong> e confirme sua conta para conseguir acessar o sistema.
-            </div>
             <a
               href="/login"
               className="mt-5 block w-full rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-700 transition-colors text-center"
             >
-              Ir para o Login
+              Fazer login
             </a>
           </div>
         </div>
@@ -101,7 +107,6 @@ export default function PublicRegisterPage() {
         <div className="rounded-2xl bg-white shadow-2xl px-6 py-8">
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
 
-            {/* Nome */}
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium text-slate-700">Nome completo *</label>
               <input
@@ -114,7 +119,6 @@ export default function PublicRegisterPage() {
               {errors.nome && <p className="text-xs text-red-600">{errors.nome}</p>}
             </div>
 
-            {/* Email */}
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium text-slate-700">E-mail *</label>
               <input
@@ -127,7 +131,6 @@ export default function PublicRegisterPage() {
               {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
             </div>
 
-            {/* Senha */}
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium text-slate-700">Senha *</label>
               <input
@@ -140,7 +143,6 @@ export default function PublicRegisterPage() {
               {errors.senha && <p className="text-xs text-red-600">{errors.senha}</p>}
             </div>
 
-            {/* Confirmar senha */}
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium text-slate-700">Confirmar senha *</label>
               <input
@@ -153,14 +155,12 @@ export default function PublicRegisterPage() {
               {errors.confirmar && <p className="text-xs text-red-600">{errors.confirmar}</p>}
             </div>
 
-            {/* Error geral */}
             {status === 'error' && (
               <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
                 {errorMsg || 'Ocorreu um erro. Tente novamente.'}
               </div>
             )}
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={status === 'loading'}
@@ -182,7 +182,6 @@ export default function PublicRegisterPage() {
               )}
             </button>
 
-            {/* Link login */}
             <p className="text-center text-sm text-slate-500">
               Já tem conta?{' '}
               <a href="/login" className="font-medium text-primary-600 hover:underline">
