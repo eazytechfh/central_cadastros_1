@@ -7,7 +7,9 @@ import LoginPage from './pages/LoginPage'
 import ContactsPage from './pages/ContactsPage'
 import DashboardPage from './pages/DashboardPage'
 import MembersPage from './pages/MembersPage'
+import SharePage from './pages/SharePage'
 import PublicRegisterPage from './pages/PublicRegisterPage'
+import PublicContactPage from './pages/PublicContactPage'
 
 function NotFound() {
   return (
@@ -28,13 +30,17 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          {/* Páginas públicas */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registrar" element={<PublicRegisterPage />} />
+          <Route path="/c/:slug" element={<PublicContactPage />} />
 
+          {/* Páginas protegidas */}
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
               <Route index element={<Navigate to="/contacts" replace />} />
               <Route path="/contacts" element={<ContactsPage />} />
+              <Route path="/compartilhar" element={<SharePage />} />
 
               <Route element={<AdminRoute />}>
                 <Route path="/dashboard" element={<DashboardPage />} />

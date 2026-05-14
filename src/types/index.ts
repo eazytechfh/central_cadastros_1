@@ -5,6 +5,7 @@ export interface Profile {
   name: string
   email: string
   role: UserRole
+  slug: string
   created_at: string
 }
 
