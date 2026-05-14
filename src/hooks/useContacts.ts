@@ -98,6 +98,40 @@ export function useContacts() {
 
   const contacts = applyFilters(allContacts, filters)
 
+  const exportToCSV = (scope: 'filtered' | 'all') => {
+    const data = scope === 'filtered' ? contacts : allContacts
+    if (data.length === 0) return
+
+    const headers = ['Nome', 'Telefone', 'Bairro', 'Igreja', 'Cadastrado por', 'Data']
+    const rows = data.map((c) => [
+      c.nome,
+      c.telefone,
+      c.bairro,
+      c.igreja,
+      c.profiles?.name ?? '',
+      new Date(c.created_at).toLocaleDateString('pt-BR'),
+    ])
+
+    const csvContent = [headers, ...rows]
+      .map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(';')
+      )
+      .join('\n')
+
+    const bom = '﻿' // UTF-8 BOM para abrir corretamente no Excel
+    const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    const filename =
+      scope === 'filtered'
+        ? `contatos-filtrados-${new Date().toISOString().slice(0, 10)}.csv`
+        : `contatos-todos-${new Date().toISOString().slice(0, 10)}.csv`
+    link.href = url
+    link.download = filename
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
   return {
     contacts,
     totalUnfiltered: allContacts.length,
@@ -108,6 +142,7 @@ export function useContacts() {
     createContact,
     deleteContact,
     refetch: fetchContacts,
+    exportToCSV,
     isAdmin,
   }
 }
