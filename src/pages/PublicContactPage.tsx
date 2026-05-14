@@ -2,6 +2,16 @@ import { useState, useEffect, type FormEvent } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
+const PREPOSITIONS = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'a', 'o', 'em', 'no', 'na', 'nos', 'nas', 'por', 'para'])
+function normalizeText(value: string): string {
+  return value.trim().replace(/\s+/g, ' ').split(' ').map((word, i) => {
+    if (!word) return word
+    const lower = word.toLowerCase()
+    if (i !== 0 && PREPOSITIONS.has(lower)) return lower
+    return lower.charAt(0).toUpperCase() + lower.slice(1)
+  }).join(' ')
+}
+
 type Status = 'idle' | 'loading' | 'success' | 'error' | 'not_found'
 
 interface MemberInfo {
@@ -67,10 +77,10 @@ export default function PublicContactPage() {
 
     const { data, error } = await supabase.rpc('registrar_contato_por_link', {
       p_slug: slug,
-      p_nome: nome.trim(),
+      p_nome: normalizeText(nome),
       p_telefone: telefone,
-      p_bairro: bairro.trim(),
-      p_igreja: igreja.trim(),
+      p_bairro: normalizeText(bairro),
+      p_igreja: normalizeText(igreja),
     })
 
     if (error) {

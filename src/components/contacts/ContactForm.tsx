@@ -18,6 +18,23 @@ function formatPhone(value: string) {
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
 }
 
+// Normaliza texto: remove espaços extras + Title Case (respeitando preposições do PT-BR)
+const PREPOSITIONS = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'a', 'o', 'em', 'no', 'na', 'nos', 'nas', 'por', 'para'])
+
+function normalizeText(value: string): string {
+  return value
+    .trim()
+    .replace(/\s+/g, ' ')
+    .split(' ')
+    .map((word, i) => {
+      if (!word) return word
+      const lower = word.toLowerCase()
+      if (i !== 0 && PREPOSITIONS.has(lower)) return lower
+      return lower.charAt(0).toUpperCase() + lower.slice(1)
+    })
+    .join(' ')
+}
+
 export default function ContactForm({ onSubmit, onCancel }: ContactFormProps) {
   const [form, setForm] = useState<ContactFormData>(empty)
   const [errors, setErrors] = useState<Partial<ContactFormData>>({})
@@ -60,6 +77,7 @@ export default function ContactForm({ onSubmit, onCancel }: ContactFormProps) {
         placeholder="Ex: João da Silva"
         value={form.nome}
         onChange={(e) => set('nome', e.target.value)}
+        onBlur={(e) => set('nome', normalizeText(e.target.value))}
         error={errors.nome}
       />
       <Input
@@ -71,9 +89,10 @@ export default function ContactForm({ onSubmit, onCancel }: ContactFormProps) {
       />
       <Input
         label="Bairro"
-        placeholder="Ex: Centro"
+        placeholder="Ex: Campo Grande"
         value={form.bairro}
         onChange={(e) => set('bairro', e.target.value)}
+        onBlur={(e) => set('bairro', normalizeText(e.target.value))}
         error={errors.bairro}
       />
       <Input
@@ -81,6 +100,7 @@ export default function ContactForm({ onSubmit, onCancel }: ContactFormProps) {
         placeholder="Ex: Assembleia de Deus"
         value={form.igreja}
         onChange={(e) => set('igreja', e.target.value)}
+        onBlur={(e) => set('igreja', normalizeText(e.target.value))}
         error={errors.igreja}
       />
 
