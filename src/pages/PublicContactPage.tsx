@@ -37,14 +37,10 @@ export default function PublicContactPage() {
     setErrors((p) => ({ ...p, telefone: '' }))
   }
 
-  // Busca o membro pelo slug
+  // Busca o membro pelo slug via RPC (SECURITY DEFINER — funciona sem login)
   useEffect(() => {
     async function fetchMember() {
-      const { data } = await supabase
-        .from('profiles')
-        .select('name, slug')
-        .eq('slug', slug)
-        .single()
+      const { data } = await supabase.rpc('get_membro_por_slug', { p_slug: slug })
       if (data) setMember(data as MemberInfo)
       else setStatus('not_found')
       setLoadingMember(false)
