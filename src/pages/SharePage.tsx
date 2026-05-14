@@ -11,6 +11,30 @@ export default function SharePage() {
     return <div className="flex justify-center py-20"><Spinner size="lg" /></div>
   }
 
+  // Se o slug ainda não foi gerado (migration pendente), mostra aviso
+  if (!profile.slug) {
+    return (
+      <div className="space-y-6 max-w-2xl mx-auto">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Compartilhar</h1>
+          <p className="mt-1 text-sm text-slate-500">Compartilhe seu link para os seus contatos se afiliarem a você</p>
+        </div>
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 flex gap-4">
+          <svg className="h-6 w-6 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <p className="font-semibold text-amber-800">Configuração pendente</p>
+            <p className="mt-1 text-sm text-amber-700">
+              O administrador precisa executar a <strong>migration_v4.sql</strong> no Supabase para ativar os links únicos.
+              Após a execução, recarregue esta página.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const baseUrl = window.location.origin
   const shareUrl = `${baseUrl}/c/${profile.slug}`
 
