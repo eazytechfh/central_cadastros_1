@@ -61,7 +61,6 @@ export default function ContactTable({
             <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Nome</th>
             <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Telefone</th>
             <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Bairro</th>
-            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Igreja</th>
             {showOwner && (
               <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Membro</th>
             )}
@@ -75,7 +74,6 @@ export default function ContactTable({
               <td className="px-4 py-3 text-sm font-medium text-slate-900">{c.nome}</td>
               <td className="px-4 py-3 text-sm text-slate-600">{c.telefone}</td>
               <td className="px-4 py-3 text-sm text-slate-600">{c.bairro}</td>
-              <td className="px-4 py-3 text-sm text-slate-600">{c.igreja}</td>
               {showOwner && (
                 <td className="px-4 py-3 text-sm text-slate-600">
                   {c.created_by === null ? (

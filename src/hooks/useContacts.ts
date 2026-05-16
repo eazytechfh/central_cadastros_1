@@ -6,7 +6,6 @@ import type { Contact, ContactFormData } from '../types'
 export interface ContactFilters {
   telefone: string
   memberName: string
-  igreja: string
   bairro: string
   dataInicio: string
   dataFim: string
@@ -15,7 +14,6 @@ export interface ContactFilters {
 export const emptyFilters: ContactFilters = {
   telefone: '',
   memberName: '',
-  igreja: '',
   bairro: '',
   dataInicio: '',
   dataFim: '',
@@ -26,8 +24,6 @@ function applyFilters(contacts: Contact[], filters: ContactFilters): Contact[] {
     if (filters.telefone && !c.telefone.replace(/\D/g, '').includes(filters.telefone.replace(/\D/g, '')))
       return false
     if (filters.memberName && !c.profiles?.name.toLowerCase().includes(filters.memberName.toLowerCase()))
-      return false
-    if (filters.igreja && !c.igreja.toLowerCase().includes(filters.igreja.toLowerCase()))
       return false
     if (filters.bairro && !c.bairro.toLowerCase().includes(filters.bairro.toLowerCase()))
       return false
@@ -102,12 +98,11 @@ export function useContacts() {
     const data = scope === 'filtered' ? contacts : allContacts
     if (data.length === 0) return
 
-    const headers = ['Nome', 'Telefone', 'Bairro', 'Igreja', 'Cadastrado por', 'Data']
+    const headers = ['Nome', 'Telefone', 'Bairro', 'Cadastrado por', 'Data']
     const rows = data.map((c) => [
       c.nome,
       c.telefone,
       c.bairro,
-      c.igreja,
       c.profiles?.name ?? '',
       new Date(c.created_at).toLocaleDateString('pt-BR'),
     ])

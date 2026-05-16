@@ -42,12 +42,6 @@ export default function ContactFiltersBar({ filters, onChange, showMemberFilter 
           />
         )}
         <Input
-          label="Igreja"
-          placeholder="Filtrar por igreja..."
-          value={filters.igreja}
-          onChange={(e) => set('igreja', e.target.value)}
-        />
-        <Input
           label="Bairro"
           placeholder="Filtrar por bairro..."
           value={filters.bairro}

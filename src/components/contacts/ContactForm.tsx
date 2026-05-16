@@ -8,7 +8,7 @@ interface ContactFormProps {
   onCancel?: () => void
 }
 
-const empty: ContactFormData = { nome: '', telefone: '', bairro: '', igreja: '' }
+const empty: ContactFormData = { nome: '', telefone: '', bairro: '' }
 
 function formatPhone(value: string) {
   const digits = value.replace(/\D/g, '').slice(0, 11)
@@ -51,7 +51,6 @@ export default function ContactForm({ onSubmit, onCancel }: ContactFormProps) {
     if (!form.nome.trim()) e.nome = 'Nome é obrigatório'
     if (!form.telefone.trim()) e.telefone = 'Telefone é obrigatório'
     if (!form.bairro.trim()) e.bairro = 'Bairro é obrigatório'
-    if (!form.igreja.trim()) e.igreja = 'Igreja é obrigatória'
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -94,14 +93,6 @@ export default function ContactForm({ onSubmit, onCancel }: ContactFormProps) {
         onChange={(e) => set('bairro', e.target.value)}
         onBlur={(e) => set('bairro', normalizeText(e.target.value))}
         error={errors.bairro}
-      />
-      <Input
-        label="Igreja"
-        placeholder="Ex: Assembleia de Deus"
-        value={form.igreja}
-        onChange={(e) => set('igreja', e.target.value)}
-        onBlur={(e) => set('igreja', normalizeText(e.target.value))}
-        error={errors.igreja}
       />
 
       {submitError && (

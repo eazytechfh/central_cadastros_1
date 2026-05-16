@@ -27,7 +27,6 @@ export default function PublicContactPage() {
   const [nome, setNome] = useState('')
   const [telefone, setTelefone] = useState('')
   const [bairro, setBairro] = useState('')
-  const [igreja, setIgreja] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [status, setStatus] = useState<Status>('idle')
   const [errorMsg, setErrorMsg] = useState('')
@@ -63,7 +62,6 @@ export default function PublicContactPage() {
     if (!nome.trim()) e.nome = 'Informe seu nome completo'
     if (telefone.replace(/\D/g, '').length < 10) e.telefone = 'Informe um telefone válido'
     if (!bairro.trim()) e.bairro = 'Informe seu bairro'
-    if (!igreja.trim()) e.igreja = 'Informe sua igreja'
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -80,7 +78,7 @@ export default function PublicContactPage() {
       p_nome: normalizeText(nome),
       p_telefone: telefone,
       p_bairro: normalizeText(bairro),
-      p_igreja: normalizeText(igreja),
+      p_igreja: '',
     })
 
     if (error) {
@@ -208,18 +206,6 @@ export default function PublicContactPage() {
                 className={`block w-full rounded-lg border px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${errors.bairro ? 'border-red-400' : 'border-slate-300'}`}
               />
               {errors.bairro && <p className="text-xs text-red-600">{errors.bairro}</p>}
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-slate-700">Igreja *</label>
-              <input
-                type="text"
-                placeholder="Ex: Igreja Batista Central"
-                value={igreja}
-                onChange={(e) => { setIgreja(e.target.value); setErrors((p) => ({ ...p, igreja: '' })) }}
-                className={`block w-full rounded-lg border px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${errors.igreja ? 'border-red-400' : 'border-slate-300'}`}
-              />
-              {errors.igreja && <p className="text-xs text-red-600">{errors.igreja}</p>}
             </div>
 
             {status === 'error' && (
