@@ -52,14 +52,12 @@ export function useMembers() {
   }
 
   const changeRole = async (id: string, role: 'admin' | 'member') => {
-    const { error } = await supabase
+    const { error } = await adminClient
       .from('profiles')
       .update({ role })
       .eq('id', id)
     if (error) return { error: error.message }
-    setMembers((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, role } : m))
-    )
+    await fetchMembers()
     return { error: null }
   }
 
