@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import type { Profile } from '../types'
 
@@ -18,7 +17,7 @@ export function useMembers() {
 
   const fetchMembers = useCallback(async () => {
     setLoading(true)
-    const { data, error } = await supabase
+    const { data, error } = await adminClient
       .from('profiles')
       .select('*')
       .order('name')
@@ -52,11 +51,19 @@ export function useMembers() {
   }
 
   const changeRole = async (id: string, role: 'admin' | 'member') => {
-    const { error } = await adminClient
+    // Atualiza a tabela profiles
+    const { error: profileError } = await adminClient
       .from('profiles')
       .update({ role })
       .eq('id', id)
-    if (error) return { error: error.message }
+    if (profileError) return { error: profileError.message }
+
+    // Atualiza também os metadados do auth (mantém sincronizado)
+    const { error: authError } = await adminClient.auth.admin.updateUserById(id, {
+      user_metadata: { role },
+    })
+    if (authError) return { error: authError.message }
+
     await fetchMembers()
     return { error: null }
   }
