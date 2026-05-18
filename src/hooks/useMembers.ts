@@ -44,6 +44,28 @@ export function useMembers() {
     return { error: null }
   }
 
+  const updateMember = async (id: string, name: string, email: string, password: string) => {
+    // Atualiza nome na tabela profiles
+    const { error: profileError } = await adminClient
+      .from('profiles')
+      .update({ name })
+      .eq('id', id)
+    if (profileError) return { error: profileError.message }
+
+    // Atualiza email e senha no Auth (senha só se informada)
+    const authUpdate: { email: string; password?: string; user_metadata: { name: string } } = {
+      email,
+      user_metadata: { name },
+    }
+    if (password) authUpdate.password = password
+
+    const { error: authError } = await adminClient.auth.admin.updateUserById(id, authUpdate)
+    if (authError) return { error: authError.message }
+
+    await fetchMembers()
+    return { error: null }
+  }
+
   const deleteMember = async (id: string) => {
     const { error: authError } = await adminClient.auth.admin.deleteUser(id)
     if (authError) return { error: authError.message }
@@ -68,5 +90,5 @@ export function useMembers() {
     return { error: null }
   }
 
-  return { members, loading, error, createMember, deleteMember, changeRole }
+  return { members, loading, error, createMember, updateMember, deleteMember, changeRole }
 }

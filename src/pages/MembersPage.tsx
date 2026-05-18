@@ -2,15 +2,18 @@ import { useState } from 'react'
 import { useMembers } from '../hooks/useMembers'
 import { useAuth } from '../contexts/AuthContext'
 import CreateMemberModal from '../components/members/CreateMemberModal'
+import EditMemberModal from '../components/members/EditMemberModal'
 import Button from '../components/ui/Button'
 import Badge from '../components/ui/Badge'
 import Spinner from '../components/ui/Spinner'
 import EmptyState from '../components/ui/EmptyState'
+import type { Profile } from '../types'
 
 export default function MembersPage() {
   const { profile: currentUser } = useAuth()
-  const { members, loading, createMember, deleteMember, changeRole } = useMembers()
+  const { members, loading, createMember, updateMember, deleteMember, changeRole } = useMembers()
   const [showModal, setShowModal] = useState(false)
+  const [editingMember, setEditingMember] = useState<Profile | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [changingRoleId, setChangingRoleId] = useState<string | null>(null)
 
@@ -54,9 +57,7 @@ export default function MembersPage() {
               <tr key={m.id} className="hover:bg-slate-50 transition-colors">
                 <td className="px-4 py-3 text-sm font-medium text-slate-900">
                   {m.name}
-                  {isSelf && (
-                    <span className="ml-2 text-xs text-slate-400">(você)</span>
-                  )}
+                  {isSelf && <span className="ml-2 text-xs text-slate-400">(você)</span>}
                 </td>
                 <td className="px-4 py-3 text-sm text-slate-600">{m.email}</td>
                 <td className="px-4 py-3">
@@ -69,7 +70,21 @@ export default function MembersPage() {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-2">
-                    {/* Botão de promover/rebaixar — não aparece para o próprio usuário */}
+
+                    {/* Botão Editar — aparece para todos incluindo o próprio */}
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setEditingMember(m)}
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Editar
+                    </Button>
+
+                    {/* Botão promover/rebaixar — não aparece para o próprio usuário */}
                     {!isSelf && (
                       <Button
                         variant="secondary"
@@ -146,22 +161,15 @@ export default function MembersPage() {
         />
       ) : (
         <div className="space-y-6">
-          {/* Administradores */}
           {admins.length > 0 && (
             <div>
-              <h2 className="mb-3 text-sm font-semibold text-slate-500 uppercase tracking-wider">
-                Administradores
-              </h2>
+              <h2 className="mb-3 text-sm font-semibold text-slate-500 uppercase tracking-wider">Administradores</h2>
               {renderTable(admins)}
             </div>
           )}
-
-          {/* Membros */}
           {regular.length > 0 && (
             <div>
-              <h2 className="mb-3 text-sm font-semibold text-slate-500 uppercase tracking-wider">
-                Membros
-              </h2>
+              <h2 className="mb-3 text-sm font-semibold text-slate-500 uppercase tracking-wider">Membros</h2>
               {renderTable(regular)}
             </div>
           )}
@@ -172,6 +180,13 @@ export default function MembersPage() {
         open={showModal}
         onClose={() => setShowModal(false)}
         onCreate={createMember}
+      />
+
+      <EditMemberModal
+        open={!!editingMember}
+        member={editingMember}
+        onClose={() => setEditingMember(null)}
+        onSave={updateMember}
       />
     </div>
   )
