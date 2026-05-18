@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import type { Profile } from '../types'
 
@@ -51,18 +52,17 @@ export function useMembers() {
   }
 
   const changeRole = async (id: string, role: 'admin' | 'member') => {
-    // Atualiza a tabela profiles
-    const { error: profileError } = await adminClient
-      .from('profiles')
-      .update({ role })
-      .eq('id', id)
-    if (profileError) return { error: profileError.message }
+    // Usa RPC SECURITY DEFINER — garante que a atualização bypassa RLS
+    const { error: rpcError } = await supabase.rpc('set_user_role', {
+      p_id: id,
+      p_role: role,
+    })
+    if (rpcError) return { error: rpcError.message }
 
-    // Atualiza também os metadados do auth (mantém sincronizado)
-    const { error: authError } = await adminClient.auth.admin.updateUserById(id, {
+    // Sincroniza também o user_metadata do Auth
+    await adminClient.auth.admin.updateUserById(id, {
       user_metadata: { role },
     })
-    if (authError) return { error: authError.message }
 
     await fetchMembers()
     return { error: null }
