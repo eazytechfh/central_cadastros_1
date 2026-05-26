@@ -2,9 +2,11 @@ import { useState, useRef, useEffect } from 'react'
 import { useContacts } from '../hooks/useContacts'
 import ContactTable from '../components/contacts/ContactTable'
 import ContactForm from '../components/contacts/ContactForm'
+import EditContactModal from '../components/contacts/EditContactModal'
 import ContactFiltersBar from '../components/contacts/ContactFilters'
 import Modal from '../components/ui/Modal'
 import Button from '../components/ui/Button'
+import type { Contact } from '../types'
 
 export default function ContactsPage() {
   const {
@@ -14,6 +16,7 @@ export default function ContactsPage() {
     filters,
     setFilters,
     createContact,
+    updateContact,
     deleteContact,
     exportToCSV,
     isAdmin,
@@ -21,6 +24,7 @@ export default function ContactsPage() {
 
   const [showModal, setShowModal] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
+  const [editingContact, setEditingContact] = useState<Contact | null>(null)
   const [showExportMenu, setShowExportMenu] = useState(false)
   const exportRef = useRef<HTMLDivElement>(null)
 
@@ -146,11 +150,13 @@ export default function ContactsPage() {
         contacts={contacts}
         loading={loading}
         showOwner={isAdmin}
+        isAdmin={isAdmin}
         onDelete={deleteContact}
+        onEdit={isAdmin ? (c) => setEditingContact(c) : undefined}
         onAdd={() => setShowModal(true)}
       />
 
-      {/* Modal */}
+      {/* Modal novo contato */}
       <Modal
         open={showModal}
         title="Novo Contato"
@@ -165,6 +171,14 @@ export default function ContactsPage() {
           onCancel={() => setShowModal(false)}
         />
       </Modal>
+
+      {/* Modal editar contato — apenas admin */}
+      <EditContactModal
+        open={!!editingContact}
+        contact={editingContact}
+        onClose={() => setEditingContact(null)}
+        onSave={updateContact}
+      />
     </div>
   )
 }

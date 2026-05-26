@@ -85,6 +85,29 @@ export function useContacts() {
     return { error: null }
   }
 
+  const updateContact = async (id: string, data: { nome: string; telefone: string; bairro: string }) => {
+    // Verifica telefone duplicado em outro contato
+    const cleanPhone = data.telefone.replace(/\D/g, '')
+    const existing = allContacts.find(
+      (c) => c.id !== id && c.telefone.replace(/\D/g, '') === cleanPhone
+    )
+    if (existing) {
+      return { error: `Este telefone já está cadastrado (${existing.nome}).` }
+    }
+
+    const { error } = await supabase
+      .from('contacts')
+      .update(data)
+      .eq('id', id)
+
+    if (error) {
+      if (error.code === '23505') return { error: 'Este telefone já está cadastrado no sistema.' }
+      return { error: error.message }
+    }
+    await fetchContacts()
+    return { error: null }
+  }
+
   const deleteContact = async (id: string) => {
     const { error } = await supabase.from('contacts').delete().eq('id', id)
     if (error) return { error: error.message }
@@ -135,6 +158,7 @@ export function useContacts() {
     filters,
     setFilters,
     createContact,
+    updateContact,
     deleteContact,
     refetch: fetchContacts,
     exportToCSV,

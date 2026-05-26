@@ -8,7 +8,9 @@ interface ContactTableProps {
   contacts: Contact[]
   loading: boolean
   showOwner?: boolean
+  isAdmin?: boolean
   onDelete: (id: string) => Promise<{ error: string | null }>
+  onEdit?: (contact: Contact) => void
   onAdd: () => void
 }
 
@@ -16,7 +18,9 @@ export default function ContactTable({
   contacts,
   loading,
   showOwner = false,
+  isAdmin = false,
   onDelete,
+  onEdit,
   onAdd,
 }: ContactTableProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -29,11 +33,7 @@ export default function ContactTable({
   }
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Spinner size="lg" />
-      </div>
-    )
+    return <div className="flex justify-center py-12"><Spinner size="lg" /></div>
   }
 
   if (contacts.length === 0) {
@@ -92,14 +92,30 @@ export default function ContactTable({
                 {new Date(c.created_at).toLocaleDateString('pt-BR')}
               </td>
               <td className="px-4 py-3 text-right">
-                <Button
-                  variant="danger"
-                  size="sm"
-                  loading={deletingId === c.id}
-                  onClick={() => handleDelete(c.id)}
-                >
-                  Excluir
-                </Button>
+                <div className="flex items-center justify-end gap-2">
+                  {/* Botão Editar — apenas admin */}
+                  {isAdmin && onEdit && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => onEdit(c)}
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Editar
+                    </Button>
+                  )}
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    loading={deletingId === c.id}
+                    onClick={() => handleDelete(c.id)}
+                  >
+                    Excluir
+                  </Button>
+                </div>
               </td>
             </tr>
           ))}
